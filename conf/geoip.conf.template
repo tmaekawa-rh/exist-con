@@ -1,0 +1,2 @@
+[geoip]
+database = /path/to/your/GeoLite2-City.mmdb
