@@ -1,0 +1,5 @@
+#!/bin/bash
+
+/opt/app-root/bin/python manage.py exploit reputation threat threat_hunter twitter twitter_hunter
+sleep 1
+/opt/app-root/bin/python manage.py migrate
