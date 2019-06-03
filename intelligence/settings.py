@@ -26,7 +26,7 @@ SECRET_KEY = '&ug=2p3t^x+&!9vt*kjr--g-)ta5=o)4@v&6ks-w#k69nl+v$k'
 DEBUG = True
 
 ALLOWED_HOSTS = [
-    '.apps.kepcodevops.openshift.com'
+    '.3d6a.kepcodevops.openshiftapps.com'
 ]
 
 
