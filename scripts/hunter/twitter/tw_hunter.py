@@ -54,7 +54,8 @@ def argParse():
     return args
 
 def getClientKey():
-    auth_hunter = 'auth-hunter%02d' % random.randint(0,18)
+#    auth_hunter = 'auth-hunter%02d' % random.randint(0,18)
+    auth_hunter = 'auth-hunter%02d' % random.randint(0,2)
     CK = conf.get(auth_hunter, 'CK')
     CS = conf.get(auth_hunter, 'CS')
     AT = conf.get(auth_hunter, 'AT')
