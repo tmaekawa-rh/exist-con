@@ -1,0 +1,87 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: exist-web-test
+  name: exist-web-test
+spec:
+  replicas: 1
+  selector:
+    app: exist-web-test
+    deploymentconfig: exist-web-test
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      labels:
+        app: exist-web-test
+        deploymentconfig: exist-web-test
+    spec:
+      containers:
+      - image: docker-registry.default.svc:5000/exist-test/exist-web-test@sha256:6d27213e529d17dda8eb562b9c0a51c95ff85f4b8f008ecdca1ed908655550d2
+        imagePullPolicy: Always
+        name: exist-web-test
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /opt/app-root/src/conf
+          name: vt-geoip-conf
+          readOnly: true
+        - mountPath: /opt/app-root/src/scripts/insert2db/conf/
+          name: insert2db-conf
+          readOnly: true
+      - image: docker-registry.default.svc:5000/exist-test/exist-web-test:latest
+        imagePullPolicy: IfNotPresent
+        name: exist-celery-test
+        command:
+          - '/opt/app-root/bin/celery'
+        args:
+          - 'worker'
+          - '-A'
+          - 'intelligence'
+          - '--pidfile=/opt/app-root/src/%n.pid'
+          - '--logfile=/opt/app-root/src/logs/%n%I.log'
+          - '--loglevel=INFO'
+          - '--time-limit=300'
+          - '--concurrency=8'
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: vt-geoip-conf
+        secret:
+          defaultMode: 420
+          secretName: vt-geoip-conf
+      - name: insert2db-conf
+        secret:
+          defaultMode: 420
+          secretName: insert2db-conf
+  test: false
+  triggers:
+  - type: ConfigChange
+  - imageChangeParams:
+      automatic: true
+      containerNames:
+      - exist-web-test
+      from:
+        kind: ImageStreamTag
+        name: exist-web-test:latest
+        namespace: exist-test
+    type: ImageChange

@@ -1,0 +1,34 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: collect-feeds
+spec:
+  schedule: "*/3 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: reputation
+            image: >-
+              docker-registry.default.svc:5000/exist-test/exist-web-test:latest
+            command:
+              - '/opt/app-root/bin/python'
+            args:
+              - '/opt/app-root/src/scripts/insert2db/reputation/insert2db.py'
+            volumeMounts:
+              - name: vt-geoip-conf
+                mountPath: "/opt/app-root/src/conf"
+                readOnly: true
+              - name: insert2db-conf
+                mountPath: "/opt/app-root/src/scripts/insert2db/conf/"
+                readOnly: true
+
+          restartPolicy: Never
+          volumes:
+          - name: vt-geoip-conf
+            secret:
+              secretName: vt-geoip-conf
+          - name: insert2db-conf
+            secret:
+              secretName: insert2db-conf

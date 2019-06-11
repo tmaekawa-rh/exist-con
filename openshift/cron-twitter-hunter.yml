@@ -1,0 +1,27 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cron-twitter-hunter
+spec:
+  schedule: "*/10 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+          - name: twitter-hunter
+            image: >-
+              docker-registry.default.svc:5000/exist-test/exist-web-test:latest
+            command:
+              - '/opt/app-root/bin/python'
+            args:
+              - '/opt/app-root/src/scripts/hunter/twitter/tw_watchhunter.py'
+            volumeMounts:
+              - name: hunter-conf
+                mountPath: "/opt/app-root/src/scripts/hunter/conf"
+                readOnly: true
+          restartPolicy: Never
+          volumes:
+          - name: hunter-conf
+            secret:
+              secretName: hunter-conf
